@@ -5,7 +5,7 @@
   "main": "index.ts",
   "scripts": {
     "test": "echo \"There is no test!\"",
-    "build": "npx tsc",
+    "build": "npx tsc && echo \"Build completed successfully!\"",
     "start": "node dist/index.js",
     "dev": "tsnd --respawn --transpile-only index.ts"
   },
@@ -17,6 +17,7 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
+    "avro-js": "^1.11.3",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "ts-node": "^10.9.1"
