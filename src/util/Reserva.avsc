@@ -1,0 +1,14 @@
+{
+  "type": "record",
+  "name": "Reserva",
+  "doc": "Atributos de uma reserva",
+  "aliases": ["Pedido"],
+  "fields": [
+    { "name": "id_pedido", "type": "long" }, 
+    { "name": "horario", "doc": "Data e hora da reserva", "type": { "type": "long", "logicalType": "timestamp-millis" } },
+    { "name": "quant_pessoas", "doc": "Quantidade de pessoas da reserva", "type": "int"},
+    { "name": "numero_mesa", "type": "int" },
+    { "name": "cliente", "doc": "Nome do cliente requisitante", "type": "string"},
+    { "name": "descricao_adicional", "type": ["null", "string"], "default": null }
+  ]
+}

@@ -1,6 +1,7 @@
 import express from "express";
 import avro from "avro-js";
 import util from "util";
+import assertValid from "../util/assertValid";
 
 const test = express.Router();
 
@@ -23,14 +24,6 @@ const someUser = {
   favorite_number: null,
   favorite_color: { string: `red` },
 };
-
-function assertValid(type, val) {
-  return type.isValid(val, { errorHook: hook });
-
-  function hook(path, any) {
-    throw new Error(util.format("invalid %s: %j", path.join(), any));
-  }
-}
 
 test.post("/", (req, res) => {
   try {

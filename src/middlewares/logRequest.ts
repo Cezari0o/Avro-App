@@ -11,7 +11,11 @@ logger.use((req, res, next) => {
   request["user"] = req.headers["user-agent"];
   request["ip_address"] = req.ip;
 
-  console.log(request);
+  const logRequests = process.env.LOG_REQUEST == 'true';
+
+  if (logRequests) {
+    console.log(request);
+  }
   next();
 });
 
