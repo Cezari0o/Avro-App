@@ -1,6 +1,6 @@
 import express from "express";
 import avro from "avro-js";
-import util from 'util';
+import util from "util";
 
 const test = express.Router();
 
@@ -13,8 +13,9 @@ const userSchema = avro.parse({
   type: "record",
   fields: [
     { name: "name", type: "string" },
-    { name: "favorite_number", type: ["int", "null"] },
+    { name: "favorite_number", type: ["null", "int", "string"], default: null },
     { name: "favorite_color", type: ["null", "string"], default: null },
+    { name: "someNum", type: "long" },
   ],
 });
 const someUser = {
@@ -27,23 +28,23 @@ function assertValid(type, val) {
   return type.isValid(val, { errorHook: hook });
 
   function hook(path, any) {
-    throw new Error(util.format('invalid %s: %j', path.join(), any));
+    throw new Error(util.format("invalid %s: %j", path.join(), any));
   }
 }
 
 test.post("/", (req, res) => {
-
   try {
-
     const { user } = req.body;
-
     assertValid(userSchema, user);
-    res.json({ success: true });
+
+    const buff = userSchema.toBuffer(user);
+    const obj = userSchema.fromBuffer(buff);
+
+    res.json({ decodificado: obj, buffer: buff, random: userSchema.random() });
   } catch (err) {
-    res.json({ erro: err.toString() });
+    res.status(500).json({ erro: err.toString() });
   }
-  // const buff = userSchema.toBuffer(someUser);
-  // const obj = userSchema.fromBuffer(buff);
+
   // res.json({
   //   buffer: null,
   //   deserializado: null,
@@ -68,6 +69,38 @@ test.get("/toString", (req, res) => {
       userSchema.toString(someUser),
     ],
   });
+});
+
+test.post("/array", (req, res) => {
+  const array = req.body;
+
+  const arraySchema = avro.parse({
+    type: "array",
+    items: "string",
+    default: [],
+  });
+
+  try {
+    res.json({ success: assertValid(arraySchema, array) });
+  } catch (err) {
+    res.json({ error: err.message });
+  }
+});
+
+test.post("/map", (req, res) => {
+  const array = req.body;
+
+  const arraySchema = avro.parse({
+    type: "map",
+    values: ["long", "string", "int"],
+    default: {},
+  });
+
+  try {
+    res.json({ success: assertValid(arraySchema, array) });
+  } catch (err) {
+    res.json({ error: err.message });
+  }
 });
 
 // test.get(`/record`, (req, res) => {
