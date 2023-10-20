@@ -1,5 +1,6 @@
 import express from "express";
 import avro from "avro-js";
+import util from 'util';
 
 const test = express.Router();
 
@@ -13,25 +14,42 @@ const userSchema = avro.parse({
   fields: [
     { name: "name", type: "string" },
     { name: "favorite_number", type: ["int", "null"] },
-    { name: "favorite_color", type: ["string", "null"] },
+    { name: "favorite_color", type: ["null", "string"], default: null },
   ],
 });
 const someUser = {
   name: "Jefferson",
   favorite_number: null,
-  favorite_color: null,
+  favorite_color: { string: `red` },
 };
 
-test.get("/", (req, res) => {
+function assertValid(type, val) {
+  return type.isValid(val, { errorHook: hook });
 
-  const buff = userSchema.toBuffer(someUser);
-  const obj = userSchema.fromBuffer(buff);
-  res.json({
-    buffer: buff,
-    deserializado: obj,
-    schema: userSchema,
-    valido: userSchema.isValid(someUser),
-  });
+  function hook(path, any) {
+    throw new Error(util.format('invalid %s: %j', path.join(), any));
+  }
+}
+
+test.post("/", (req, res) => {
+
+  try {
+
+    const { user } = req.body;
+
+    assertValid(userSchema, user);
+    res.json({ success: true });
+  } catch (err) {
+    res.json({ erro: err.toString() });
+  }
+  // const buff = userSchema.toBuffer(someUser);
+  // const obj = userSchema.fromBuffer(buff);
+  // res.json({
+  //   buffer: null,
+  //   deserializado: null,
+  //   schema: userSchema,
+  //   valido: userSchema.isValid(someUser),
+  // });
 });
 
 test.get("/types", (req, res) => {
@@ -51,5 +69,11 @@ test.get("/toString", (req, res) => {
     ],
   });
 });
+
+// test.get(`/record`, (req, res) => {
+//   res.json({
+//     record_type: userSchema.getType()
+//   })
+// })
 
 export default test;
