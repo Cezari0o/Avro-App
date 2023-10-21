@@ -1,28 +1,38 @@
 import express from "express";
-import avro from "avro-js";
-import assertValid from "../util/assertValid";
-import path from "path";
-import DateType from "../avro-types/DateType";
+import { checkSchema, matchedData } from "express-validator";
+import validationMiddleware from "../util/validationMIddleware";
+
+import ReservaService from "../services/reservaService";
+import { StatusCodes } from "http-status-codes";
 
 const reserva = express.Router();
-const reservaSchema = avro.parse(
-  path.resolve(__dirname, "../util/reserva.avsc"),
-  { logicalTypes: { horario: DateType } }
-);
+const reservaService = new ReservaService();
 
-reserva.post("/", (req, res) => {
-  const novaReserva = req.body;
+reserva.post(
+  "/",
+  checkSchema(
+    {
+      horario: { isISO8601: true },
+      quant_pessoas: { isNumeric: true },
+      numero_mesa: { isNumeric: true },
+      cliente: { isString: true },
+      descricao_adicional: { isString: true, optional: true },
+    },
+    ["body"]
+  ),
+  validationMiddleware(),
+  (req: express.Request, res: express.Response) => {
+    const novaReserva = matchedData(req);
 
-  try {
-    // TODO: consertar o tipo date. Nao ta conseguindo ler a data
-    novaReserva['horario'] = new Date(novaReserva['horario']);
-    assertValid(reservaSchema, novaReserva);
-
-    const teste = reservaSchema.fromBuffer(reservaSchema.toBuffer(novaReserva));
-    res.json({ teste: teste });
-  } catch (err) {
-    res.json({ error: err.message });
+    try {
+      novaReserva["horario"] = new Date(novaReserva["horario"]);
+      reservaService.save(novaReserva).then(() => {
+        res.status(StatusCodes.CREATED).json(novaReserva);
+      });
+    } catch (err) {
+      res.json({ error: err.message });
+    }
   }
-});
+);
 
 export default reserva;
