@@ -26,9 +26,14 @@ reserva.post(
 
     try {
       novaReserva["horario"] = new Date(novaReserva["horario"]);
-      reservaService.save(novaReserva).then(() => {
-        res.status(StatusCodes.CREATED).json(novaReserva);
-      });
+      reservaService
+        .save(novaReserva)
+        .then((data) => {
+          res.status(StatusCodes.CREATED).json(data);
+        })
+        .catch((err) => {
+          res.json({ error: err.message });
+        });
     } catch (err) {
       res.json({ error: err.message });
     }
@@ -37,7 +42,12 @@ reserva.post(
 
 reserva.get("/", (req, res) => {
   try {
-    reservaService.getReservas().then((reservas) => res.json(reservas));
+    reservaService
+      .getReservas()
+      .then((reservas) => res.json(reservas))
+      .catch((err) => {
+        res.json({ error: err.message });
+      });
   } catch (err) {
     res.json({ error: err.message });
   }

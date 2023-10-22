@@ -24,14 +24,24 @@ export default class ReservaService {
   async save(reserva: any) {
     try {
       reserva["id_pedido"] = this.counter.get();
+
+      if (reserva["descricao_adicional"]) {
+        reserva["descricao_adicional"] = {
+          string: reserva["descricao_adicional"],
+        };
+      }
       assertValid(this.reservaSchema, reserva);
       const fileEncoder = avro.createFileEncoder(
         this.dataDirPath,
         this.reservaSchema
       );
+      const reservas = await this.getReservas();
+      reservas.push(reserva);
 
-      await fileEncoder.write(reserva);
+      reservas.forEach((r) => fileEncoder.write(r));
       fileEncoder.end();
+
+      return await this.getReservaById(reserva["id_pedido"]);
     } catch (err) {
       throw new Error(`Erro: ${err.message}`);
     }
@@ -53,7 +63,7 @@ export default class ReservaService {
     try {
       const fileDecoder = avro.createFileDecoder(this.dataDirPath);
 
-      const data = await fileDecoder.find(
+      const data: Reserva | undefined = await fileDecoder.find(
         (reserva: Reserva) => reserva.id_pedido == id
       );
 
