@@ -17,7 +17,7 @@ export default class ReservaService {
     console.log("arquivos:", files);
 
     this.reservaSchema = avro.parse(
-      path.resolve(__dirname, "../data/reserva.avsc"),
+      path.resolve(__dirname, "../data/Reserva.avsc"),
       { logicalTypes: { "timestamp-millis": DateType } }
     );
     this.dataDirPath = path.resolve(__dirname, "../data/reservas.avro");
