@@ -13,8 +13,8 @@ export default class ReservaService {
   private dataDirPath: string;
 
   constructor() {
-    const files = fs.readdirSync('.');
-    console.log('arquivos:', files);
+    const files = fs.readdirSync("./dist", { recursive: true });
+    console.log("arquivos:", files);
 
     this.reservaSchema = avro.parse(
       path.resolve(__dirname, "../data/reserva.avsc"),
