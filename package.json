@@ -8,7 +8,7 @@
     "start": "node dist/index.js",
     "dev": "tsnd --respawn --poll --transpile-only index.ts",
     "clean": "rimraf dist/",
-    "copyfiles": "copyfiles -u 1 src/data/*.avro src/data/*.avsc dist/src",
+    "copyfiles": "copyfiles -u 0 src/data/* dist/src/data",
     "build": "npm run clean && npx tsc && npm run copyfiles && echo \"Build completed successfully!\""
   },
   "author": "",
