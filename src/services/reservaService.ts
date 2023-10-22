@@ -13,6 +13,10 @@ export default class ReservaService {
   private dataDirPath: string;
 
   constructor() {
+    fs.readdir('.', (err, files) => {
+      console.log('erro:', err, files);
+    });
+
     this.reservaSchema = avro.parse(
       path.resolve(__dirname, "../data/reserva.avsc"),
       { logicalTypes: { "timestamp-millis": DateType } }
